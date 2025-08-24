@@ -44,7 +44,7 @@ Image.configure({
 
 ### inline
 
-Whether to set the audio extension to inline mode.
+Whether to set the image extension to inline mode.
 
 ```typescript
 Image.configure({
@@ -56,7 +56,7 @@ Image.configure({
 
 ### setImage()
 
-Insert a new audio element.
+Insert a new image element.
 
 ```typescript
 editor.commands.setImage({
@@ -66,6 +66,15 @@ editor.commands.setImage({
   align: "center",
   width: "100px"
 });
+```
+
+## Deletion behavior
+
+When the image `remove` action is used in the float menu, the extension will call the uploader storage's `delete` method with the image `src` URL. By default `delete` is a no-op; to actually remove files from remote storage you should implement the `delete` handler on the `Uploader` extension or provide `uploader.delete` in editor storage.
+
+```typescript
+// remove will call
+editor.storage.uploader.delete([editor.getAttributes('image').src]);
 ```
 
 ## InputRules

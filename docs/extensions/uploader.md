@@ -10,7 +10,7 @@ Unified method of uploading files, the default configuration is to embed the fil
 
 ```typescript
 // [TypeScript definitions](https://github.com/syfxlin/tiptap-starter-kit/blob/master/src/extensions/uploader/index.ts#L20-L22)
-Audio.configure({
+Image.configure({
   upload: (files) => {
     const items: Array<File> = [];
     for (let i = 0; i < files.length; i++) {
@@ -37,6 +37,18 @@ Audio.configure({
 });
 ```
 
+### delete
+
+Optional method to delete files from external storage. The default implementation is a no-op — override this to remove files (for example, from remote storage) when an extension requests deletion.
+
+```typescript
+Image.configure({
+  delete: async (urls: string[]) => {
+    // delete files by url from your backend / cloud storage
+  },
+});
+```
+
 ## Storage
 
 ### upload
@@ -45,6 +57,14 @@ Is a copy of the upload field of Options, providers to other extensions.
 
 ```typescript
 editor.storage.uploader.upload(FileList)
+```
+
+### delete
+
+Is a copy of the delete field of Options, providers to other extensions.
+
+```typescript
+editor.storage.uploader.delete(UrlList)
 ```
 
 ## Paste and Drop

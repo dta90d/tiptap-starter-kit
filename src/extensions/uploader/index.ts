@@ -19,10 +19,12 @@ export interface UploaderItemStorage {
 
 export interface UploaderOptions {
   upload: (files: FileList) => Promise<Array<UploaderData>>;
+  delete: (urls: string[]) => Promise<void>;
 }
 
 export interface UploaderStorage {
   upload: (files: FileList) => Promise<Array<UploaderData>>;
+  delete: (urls: string[]) => Promise<void>;
 }
 
 export const Uploader = Extension.create<UploaderOptions, UploaderStorage>({
@@ -52,11 +54,14 @@ export const Uploader = Extension.create<UploaderOptions, UploaderStorage>({
         };
         return Promise.all(items.map(item => upload(item)));
       },
+      // Override this to implement deletion e.g. from remote storage
+      delete: async (_urls) => {},
     };
   },
   addStorage() {
     return {
       upload: this.options.upload,
+      delete: this.options.delete,
     };
   },
   addProseMirrorPlugins() {
