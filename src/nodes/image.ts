@@ -17,6 +17,7 @@ export interface ImageOptions extends TImageOptions {
     error: string;
     loading: string;
     inputSrc: string;
+    inputImageSource: string;
     inputAlt: string;
     inputTitle: string;
     imageOpen: string;
@@ -39,6 +40,7 @@ export const Image = TImage.extend<ImageOptions>({
         error: "Error loading image",
         loading: "Loading image...",
         inputSrc: "Image url",
+        inputImageSource: "Image source",
         inputAlt: "Image description",
         inputTitle: "Image title",
         imageOpen: "Open image",
@@ -85,7 +87,8 @@ export const Image = TImage.extend<ImageOptions>({
       },
       uploader: {
         match: (_editor, data) => data.type.startsWith("image"),
-        apply: (editor, data) => editor.chain().setImage({ src: data.url, alt: data.name }).run(),
+        // Do not pre-fill alt with the file name when inserting programmatically
+        apply: (editor, data) => editor.chain().setImage({ src: data.url }).run(),
       },
       floatMenu: {
         hide: true,
@@ -106,6 +109,9 @@ export const Image = TImage.extend<ImageOptions>({
   addAttributes() {
     return {
       ...this.parent?.(),
+      imageSource: {
+        default: null,
+      },
       align: {
         default: "center",
       },
@@ -191,6 +197,9 @@ export const Image = TImage.extend<ImageOptions>({
             const src = view.createInput({
               id: "src",
               name: this.options.dictionary.inputSrc,
+              attributes: {
+                style: "display: none;",
+              },
               onKey: ({ key }) => {
                 if (key === "ArrowDown") {
                   const node = root.querySelector(`input[name="alt"]`) as HTMLInputElement;
@@ -203,6 +212,30 @@ export const Image = TImage.extend<ImageOptions>({
                 }
                 if (boundary === "right") {
                   const node = root.querySelector(`input[name="alt"]`) as HTMLInputElement;
+                  node?.focus();
+                }
+              },
+            });
+            const imageSource = view.createInput({
+              id: "imageSource",
+              name: this.options.dictionary.inputImageSource,
+              onKey: ({ key }) => {
+                if (key === "ArrowUp") {
+                  const node = root.querySelector(`input[name="src"]`) as HTMLInputElement;
+                  node?.focus();
+                }
+                if (key === "ArrowDown") {
+                  const node = root.querySelector(`input[name="title"]`) as HTMLInputElement;
+                  node?.focus();
+                }
+              },
+              onBoundary: (boundary) => {
+                if (boundary === "left") {
+                  const node = root.querySelector(`input[name="src"]`) as HTMLInputElement;
+                  node?.focus();
+                }
+                if (boundary === "right") {
+                  const node = root.querySelector(`input[name="title"]`) as HTMLInputElement;
                   node?.focus();
                 }
               },
@@ -272,7 +305,9 @@ export const Image = TImage.extend<ImageOptions>({
                 if (element.files && uploader) {
                   uploader.upload(element.files).then(items => items.forEach((item) => {
                     if (item.type.startsWith("image")) {
-                      editor.chain().setImage({ src: item.url, alt: item.name }).run();
+                      // Preserve current title (if any) and avoid using file name as alt
+                      const attrs = editor.getAttributes(this.name);
+                      editor.chain().setImage({ src: item.url, alt: attrs.alt, title: attrs.title }).run();
                     }
                   }));
                 }
@@ -317,6 +352,7 @@ export const Image = TImage.extend<ImageOptions>({
                   .chain()
                   .updateAttributes(this.name, {
                     src: src.querySelector("input")!.value,
+                    imageSource: imageSource.querySelector("input")!.value,
                     alt: alt.querySelector("input")!.value,
                     title: title.querySelector("input")!.value,
                   })
@@ -326,8 +362,9 @@ export const Image = TImage.extend<ImageOptions>({
             });
 
             form.append(src);
-            form.append(alt);
             form.append(title);
+            form.append(alt);
+            form.append(imageSource);
             form.append(action);
             action.append(open);
             action.append(upload);
@@ -336,21 +373,65 @@ export const Image = TImage.extend<ImageOptions>({
             action.append(alignRight);
             action.append(remove);
             root.append(form);
+
+            // Auto-save on input changes
+            const srcInput = src.querySelector("input") as HTMLInputElement | null;
+            const imageSourceInput = imageSource.querySelector("input") as HTMLInputElement | null;
+            const altInput = alt.querySelector("input") as HTMLInputElement | null;
+            const titleInput = title.querySelector("input") as HTMLInputElement | null;
+
+            // Persist sync state on the form element so it survives node changes
+            const getIsAltSynced = () => form.getAttribute("data-alt-synced") === "true";
+            const setIsAltSynced = (v: boolean) => form.setAttribute("data-alt-synced", v ? "true" : "false");
+            // Default to not synced; will be recomputed correctly in onMount
+            setIsAltSynced(false);
+
+            const applyUpdate = () => {
+              editor
+                .chain()
+                .updateAttributes(this.name, {
+                  src: srcInput?.value ?? "",
+                  imageSource: imageSourceInput?.value ?? "",
+                  alt: altInput?.value ?? "",
+                  title: titleInput?.value ?? "",
+                })
+                .run();
+            };
+
+            srcInput?.addEventListener("input", applyUpdate);
+            imageSourceInput?.addEventListener("input", applyUpdate);
+            altInput?.addEventListener("input", () => {
+              // If user types in alt and diverges from title, stop syncing for this session
+              if (altInput && titleInput && altInput.value !== titleInput.value) {
+                setIsAltSynced(false);
+              }
+              applyUpdate();
+            });
+            titleInput?.addEventListener("input", () => {
+              if (getIsAltSynced() && altInput && titleInput) {
+                altInput.value = titleInput.value;
+              }
+              applyUpdate();
+            });
           },
           onMount: ({ root }) => {
-            const src = root.querySelector(`input[name="src"]`) as HTMLInputElement;
-            if (src) {
-              src.focus();
-            }
+            const form = root.querySelector(`div.ProseMirror-fm-form`) as HTMLFormElement;
+            const altInput = root.querySelector(`input[name="alt"]`) as HTMLInputElement;
+            const titleInput = root.querySelector(`input[name="title"]`) as HTMLInputElement;
+            // Determine initial sync state: copy title -> alt if alt is empty or equals title
+            const setIsAltSynced = (v: boolean) => form?.setAttribute("data-alt-synced", v ? "true" : "false");
+            setIsAltSynced(!!(altInput && titleInput && ((altInput.value ?? "") === "" || (altInput.value ?? "") === (titleInput.value ?? ""))));
           },
           onUpdate: ({ editor, root }) => {
             const attrs = editor.getAttributes(this.name);
 
             const src = root.querySelector(`input[name="src"]`) as HTMLInputElement;
+            const imageSource = root.querySelector(`input[name="imageSource"]`) as HTMLInputElement;
             const alt = root.querySelector(`input[name="alt"]`) as HTMLInputElement;
             const title = root.querySelector(`input[name="title"]`) as HTMLInputElement;
 
             src.value = attrs.src ?? "";
+            imageSource.value = attrs.imageSource ?? "";
             alt.value = attrs.alt ?? "";
             title.value = attrs.title ?? "";
           },
