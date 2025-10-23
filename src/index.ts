@@ -11,6 +11,7 @@ export * from "./marks/italic";
 export * from "./marks/strike";
 export * from "./marks/highlight";
 export * from "./marks/underline";
+export * from "./marks/font-size";
 
 // nodes
 export * from "./nodes/text";
