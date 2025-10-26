@@ -1,17 +1,17 @@
 {
-  "name": "@syfxlin/tiptap-starter-kit",
+  "name": "@dta90d/tiptap-starter-kit",
   "type": "module",
   "version": "0.0.0-semantic-release",
-  "description": "The non-official starter kit of the Tiptap editor contains common extensions.",
-  "author": "syfxlin <i@ixk.me>",
+  "description": "The non-official starter kit of the Tiptap editor contains common extensions. Forked from @syfxlin/tiptap-starter-kit.",
+  "author": "syfxlin <i@ixk.me>, dta90d <dta90d@tuta.io>",
   "license": "MIT",
-  "homepage": "https://github.com/syfxlin/tiptap-starter-kit",
+  "homepage": "https://github.com/dta90d/tiptap-starter-kit",
   "repository": {
     "type": "git",
-    "url": "https://github.com/syfxlin/tiptap-starter-kit"
+    "url": "https://github.com/dta90d/tiptap-starter-kit"
   },
   "bugs": {
-    "url": "https://github.com/syfxlin/tiptap-starter-kit/issues"
+    "url": "https://github.com/dta90d/tiptap-starter-kit/issues"
   },
   "keywords": [
     "tiptap",

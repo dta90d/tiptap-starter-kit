@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - master
+      - dta90d
 jobs:
   publish-npm:
     name: Publish packages
@@ -14,19 +14,19 @@ jobs:
       - name: Setup PNPM
         uses: pnpm/action-setup@v4.0.0
         with:
-          version: 9.1.4
+          version: 10.19.0
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           cache: pnpm
-          node-version: 20
+          node-version: 22
           registry-url: https://registry.npmjs.org
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Build
         run: pnpm build
       - name: Publish
-        run: pnpm dlx semantic-release --branches master
+        run: pnpm dlx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
