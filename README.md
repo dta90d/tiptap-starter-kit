@@ -2,17 +2,17 @@
 
 ## Changes in this fork
 
-### v1.1.2a: BREAKING CHANGE
+### v2.0.0-dta90d.1: BREAKING CHANGE
 
 - Removed `plyr` dependency
 - Removed `audio` node
 - Removed `video` node
 
-### v1.1.2b
+### v2.0.0-dta90d.2
 
 - Added `uploader.delete` optional hook to remove uploaded files from external storage
 
-### v1.1.2c
+### v2.0.0-dta90d.3
 
 - Made major enhancements to the `image` node:
   - Added `Image source` field (e.g. google.com)
@@ -20,7 +20,7 @@
   - Fixed image tooltip (`FloatMenuView`) show/hide trigger
   - Added close button to the image tooltip (`FloatMenuView`)
   
-### v1.1.2d
+### v2.0.0-dta90d.4
 
 - Added new `font-size` mark
 - New dependency: `@tiptap/extension-text-style`
