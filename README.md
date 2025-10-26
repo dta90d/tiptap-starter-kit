@@ -1,3 +1,19 @@
+# Tiptap StarterKit (fork from @syfxlin/tiptap-starter-kit)
+
+## Changes in this fork
+
+### v1.1.2a
+
+- Removed `plyr` dependency
+- Removed `audio` node
+- Removed `video` node
+
+## Details
+
+- **Removed SSR-incompatible media player and nodes**: Removed the `plyr` dependency and the related `audio` and `video` nodes. Reason: `plyr` caused Server-Side Rendering compatibility issues for apps that render the editor on the server. Removing it simplifies the bundle and avoids runtime errors in SSR environments.
+
+- **Upgrade / merge strategy**: Keep closely tracking upstream releases and apply manual review for changes that touch media handling or uploader behavior. Reintroduce or rework browser-only features behind feature flags or runtime checks if needed.
+
 # Tiptap StarterKit
 
 @syfxlin/tiptap-starter-kit is a collection of unofficial [Tiptap](https://tiptap.dev) extensions. Support for Markdown, Float Menu, Slash Menu and more.
@@ -58,8 +74,6 @@
 - [Emoji](./docs/nodes/emoji.md)
 - [Embed](./docs/nodes/embed.md)
 - [Image](./docs/nodes/image.md)
-- [Audio](./docs/nodes/audio.md)
-- [Video](./docs/nodes/video.md)
 - [Mermaid](./docs/nodes/mermaid.md)
 - [Plantuml](./docs/nodes/plantuml.md)
 - [MathBlock](./docs/nodes/math-block.md)
