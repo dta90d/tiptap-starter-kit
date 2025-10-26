@@ -12,11 +12,21 @@
 
 - Added `uploader.delete` optional hook to remove uploaded files from external storage
 
+### v1.1.2c
+
+- Made major enhancements to the `image` node:
+  - Added `Image source` field (e.g. google.com)
+  - Made `Alt` field autopopulatable from `Title` field
+  - Fixed image tooltip (`FloatMenuView`) show/hide trigger
+  - Added close button to the image tooltip (`FloatMenuView`)
+
 ## Details
 
 - **Removed SSR-incompatible media player and nodes**: Removed the `plyr` dependency and the related `audio` and `video` nodes. Reason: `plyr` caused Server-Side Rendering compatibility issues for apps that render the editor on the server. Removing it simplifies the bundle and avoids runtime errors in SSR environments.
 
 - **Introduce `uploader.delete` hook (new, not yet committed)**: Added a `delete` option to the `Uploader` extension and an accompanying runtime API `editor.storage.uploader.delete(urls)` so other extensions (for example the `image` float-menu remove action) can call into it when a user removes uploaded assets. Reason: when assets uploaded to external storage are removed from the editor, they should be cleaned up from the remote storage to avoid orphaned files and unnecessary costs. Default behavior is a safe no-op; consumers must provide an implementation to perform deletion in their backend or cloud provider.
+
+- **Image node & Float Menu improvements**: Enhanced the `image` node and its floating tooltip to improve UX. Changes include an `imageSource` field (e.g. `google.com`), autopopulation of the `alt` attribute from the `title` field, a fixed show/hide trigger for the `FloatMenuView`, and a dedicated close button on the image tooltip. These changes also rely on the newly introduced `uploader.delete` hook so removing images can optionally trigger remote cleanup when consumers provide an implementation.
 
 - **Upgrade / merge strategy**: Keep closely tracking upstream releases and apply manual review for changes that touch media handling or uploader behavior. Reintroduce or rework browser-only features behind feature flags or runtime checks if needed.
 

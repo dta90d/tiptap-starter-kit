@@ -64,6 +64,7 @@ export class FloatMenuView implements PluginView {
   private readonly popover: Instance;
   private readonly element: HTMLElement;
   private readonly options: FloatMenuViewOptions;
+  private _onClick?: (e: MouseEvent) => void;
 
   public static create(options: FloatMenuViewOptions) {
     return () => new FloatMenuView(options);
@@ -74,6 +75,20 @@ export class FloatMenuView implements PluginView {
     this.options = options;
     this.element = this._element();
     this.popover = this._popover();
+    // Show float menu on editor clicks as well (handles clicks on already-selected nodes)
+    this._onClick = (e: MouseEvent) => {
+      try {
+        // Only react to primary button clicks
+        if ((e as MouseEvent).button !== 0) return;
+        const root = this.editor.view.dom as HTMLElement;
+        if (!root.contains(e.target as Node)) return;
+        // Force update to re-evaluate `show` and position the popover
+        this.update(this.editor.view);
+      } catch (err) {
+        // swallow — defensive
+      }
+    };
+    this.editor.view.dom.addEventListener("mousedown", this._onClick);
   }
 
   public show() {
@@ -129,6 +144,14 @@ export class FloatMenuView implements PluginView {
           to: Math.max(...this.editor.state.selection.ranges.map(range => range.$to.pos)),
         },
       });
+    }
+    // Remove click listener added in constructor
+    try {
+      if (this._onClick) {
+        this.editor.view.dom.removeEventListener("mousedown", this._onClick);
+      }
+    } catch (err) {
+      // ignore
     }
     this.popover.destroy();
     this.element.remove();
@@ -422,6 +445,33 @@ export class FloatMenuView implements PluginView {
         },
       });
     }
+    // Close button for manual dismiss of the float menu
+    const close = document.createElement("button");
+    close.type = "button";
+    close.classList.add("ProseMirror-fm-close");
+    close.setAttribute("aria-label", "Close");
+    close.setAttribute("style", "align-self: start; line-height: 18px; right: 2px; position: relative;");
+    close.innerHTML = "&times;";
+    // Prevent mouse down from bubbling to editor (editor click handler should ignore clicks outside)
+    close.addEventListener("mousedown", (e) => {
+      e.stopPropagation();
+    });
+    close.addEventListener("click", (e) => {
+      // Prevent the click bubbling to editor which may re-open the menu
+      e.stopPropagation();
+      // Deselect node if a node selection is active
+      try {
+        const selection = this.editor.state.selection;
+        if (isNodeSelection(selection)) {
+          // Move caret after the node to deselect it
+          this.editor.chain().focus().setTextSelection(selection.to).run();
+        }
+      } catch (err) {
+        // ignore
+      }
+      this.hide();
+    });
+    element.append(close);
     return element;
   }
 
