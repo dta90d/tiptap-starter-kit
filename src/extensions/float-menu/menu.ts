@@ -40,6 +40,7 @@ export const FloatMenu = Extension.create<FloatMenuOptions>({
         "underline",
         "|",
         "code",
+        "fontSize",
         "highlight",
         "link",
         "|",

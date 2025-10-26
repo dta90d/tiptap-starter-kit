@@ -45,6 +45,8 @@ import { Clipboard, ClipboardOptions } from "../clipboard";
 import { FloatMenu, FloatMenuOptions } from "../float-menu/menu";
 import { Markdown, MarkdownOptions } from "../markdown";
 import { Uploader, UploaderOptions } from "../uploader";
+import { TextStyle } from "@tiptap/extension-text-style";
+import { FontSize, FontSizeOptions } from "../../marks/font-size";
 
 export interface StarterKitOptions {
   // marks
@@ -57,6 +59,8 @@ export interface StarterKitOptions {
   strike?: Partial<StrikeOptions> | boolean;
   highlight?: Partial<HighlightOptions> | boolean;
   underline?: Partial<UnderlineOptions> | boolean;
+  textStyle?: boolean;
+  fontSize?: Partial<FontSizeOptions> | boolean;
   // nodes
   text?: boolean;
   document?: boolean;
@@ -113,6 +117,8 @@ export const StarterKit = Extension.create<StarterKitOptions>({
     configure(extensions, Strike, this.options.strike);
     configure(extensions, Highlight, this.options.highlight);
     configure(extensions, Underline, this.options.underline);
+    configure(extensions, TextStyle, this.options.textStyle ?? true);
+    configure(extensions, FontSize, this.options.fontSize);
     // nodes
     configure(extensions, Text, this.options.text);
     configure(extensions, Document, this.options.document);
