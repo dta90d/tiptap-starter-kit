@@ -283,6 +283,9 @@ export const Image = TImage.extend<ImageOptions>({
               name: this.options.dictionary.imageDelete,
               icon: icon("remove"),
               onClick: () => {
+                const uploader = this.editor.storage.uploader as UploaderStorage;
+                const attrs = editor.getAttributes(this.name);
+                uploader.delete([attrs.src]);
                 editor.chain().deleteSelection().focus().run();
               },
             });
